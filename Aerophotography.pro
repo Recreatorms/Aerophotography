@@ -39,12 +39,11 @@ HEADERS += \
     myview.h \
     graphicsviewzoom.h \
     plane.h
-
+RESOURCES += qml.qrc
 FORMS += \
         mainwindow.ui \
     planemenu.ui
 CONFIG += qmltypes
 QML_IMPORT_NAME = io.qt.examples.backend
 QML_IMPORT_MAJOR_VERSION = 1
-DISTFILES += \
-    qQuickScene.qml
+DISTFILES +=

@@ -213,9 +213,16 @@ void Scene::computeWaypoints()
 
 
         */
+
+
+
+    // ====================================================
+    // Creating points on the borders of the Zones
+
+    QVector<QVector<QVector<QPointF> > > squares;
+    QVector<QVector<QPointF> > border;
+    QVector<QPointF> pointsOnBorder;
     QPointF enterPoint;
-    QVector<QVector<QPointF> > squares;
-    QVector<QPointF> enterPoints;
     QVector<int> indexes;
     qreal radius=20; //plane scan radius;
     for (int i = 0; i < Zones.size(); i++) {
@@ -241,9 +248,11 @@ void Scene::computeWaypoints()
                             enterPoint = QPointF(Zones[i][0].rx()+k*len/numberOfPoints,Zones[i][j].ry());
                     }
                     addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5)));
-                    enterPoints.push_back(enterPoint);
+                    pointsOnBorder.push_back(enterPoint);
                     k++;
                 } while(k<(int)len/radius);
+                border.push_back(pointsOnBorder);
+                pointsOnBorder.clear();
             }
             else {
                 qreal len = QLineF(Zones[i][j],Zones[i][j+1]).length();
@@ -265,77 +274,114 @@ void Scene::computeWaypoints()
                             enterPoint = QPointF(Zones[i][j+1].rx()+k*len/numberOfPoints,Zones[i][j].ry());
                     }
                     addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5))); ///////////////////////////////////////
-                    enterPoints.push_back(enterPoint);
+                    pointsOnBorder.push_back(enterPoint);
                     k++;
-                }while(k <(int)len/radius);
+                } while(k <(int)len/radius);
+                border.push_back(pointsOnBorder);
+                pointsOnBorder.clear();
             }
         }
-        qDebug() << "\nEnterPoints\n" << enterPoints << "\n\n\n\n";
-        squares.push_back(enterPoints);
-        enterPoints.clear();
+        qDebug() << "\nEnterPoints\n" << border << "\n\n\n\n";
+        squares.push_back(border);
+        border.clear();
     }
+    qDebug() << "squares = " << squares;
 
-    for (int i = 0; i < squares.size();i++) {
-        maxLine.setLength(0.0);
-        for(int j = 0; j < squares[i].size();j++) {
-            _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
-            if(_line.length() > maxLine.length())
-                maxLine = _line;
-        }
-    }
+    // ====================================
+    // Creating Path
 
+    //    for (int i = 0; i < squares.size();i++) {
+    //        maxLine.setLength(0.0);
+    //        for(int j = 0; j < squares[i].size();j++) {
+    //            for(int k = 0; k < squares[i][j].size();k++)
+    //                _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][/*squares[i][(j+squares[i].size()/2)%squares[i].size()].size()-1-k*/k]);
+    //            //            _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
+    //            if(_line.length() > maxLine.length())
+    //                maxLine = _line;
+    //        }
+    //    }
 
-
-
-
-
-
-    //_line = QLineF(path.back(), squares[0][0]);
-    //minLine = _line;
-    _line = QLineF(path.back(), squares[0][0]);
+    _line = QLineF(path.back(), squares[0][0][0]);
     minLine = _line;
-
-    int indexI = -1, indexJ = -1;
-    for (int k = 0; k < squares.size();k++) {
-        minLine.setLength(10000);
-        for (int i = 0; i < squares.size(); i++) {
+    bool rotation = false,
+            scanned = false;
+    int indexI = -1, indexJ = -1, indexK = -1, counter = 0;
+    for (int i = 0; i < squares.size(); i++) {
+        minLine.setLength(0.0);
+            while (!scanned) {
+//        for (int n = 0; n < squares.size();n++) {
             maxLine.setLength(0.0);
 
-            qDebug() << "NEXT";
+            qDebug() << "Next square";
             for (int j = 0; j < squares[i].size(); j++) {
-                if (indexes.contains(i))
-                    break;
-                _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
-                if(_line.length() > maxLine.length()) {
-                    maxLine = _line;
+                qDebug() << "Next border";
+                for (int k = 0; k < squares[i][j].size();k++) {
+                    if(!rotation)
+                        if (indexes.contains(i))
+                            break;
+
+                    _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][/*squares[i][(j+squares[i].size()/2)%squares[i].size()].size()-1-k*/k]);
+                    //_line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
+                    if(_line.length() > maxLine.length()) {
+                        maxLine = _line;
 
 
-                    _line = QLineF(path.back(),squares[i][j]);
-                    //                qDebug() << "_Line = " << _line.length();
-                    //     qDebug() << "minLine = " << minLine.length();
-                    if (_line.length() <= minLine.length()) {
-                        qDebug() << "True";
+                        _line = QLineF(path.back(),squares[i][j][k]);
+                        //                qDebug() << "_Line = " << _line.length();
+                        //     qDebug() << "minLine = " << minLine.length();
+                        //                        if (_line.length() < minLine.length()) {
+                        qDebug() << "looking good";
                         minLine = _line;
                         indexI = i;
                         indexJ = j;
-
+                        indexK = k;
+                        if (!rotation)
+                            break;
+                        if (indexK < squares[indexI][indexJ].size()-1)
+                            indexK++;
+                        else
+                            indexK--;
+                        //                        }
                     }
                 }
             }
-        }
-        indexes.push_back(indexI);
-        path.push_back(squares[indexI][indexJ]);
-        //offset;
-        path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()]);
-        qDebug() << "Added line with length = " << minLine.length() ;
-    }
 
+        qDebug() << "added new waypoint with\nindexI = " << indexI << "\nindexJ = " << indexJ << "\nindexK = "<< indexK;
+        indexes.push_back(indexI);
+        path.push_back(squares[indexI][indexJ][indexK]);
+        //        offset;
+        path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][/*squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()].size()-1-indexK*/indexK]);
+        if (squares[indexI][indexJ].size() > 1) {
+            qDebug() << "we need another point on same border";
+            //switch(indexJ < (indexJ+squares[indexI].size()/2)%squares[indexI].size()indexJ) up down left right
+            indexJ = (indexJ+squares[indexI].size()/2)%squares[indexI].size();
+            rotation = true;
+            counter++;
+            QPointF point;
+            if(indexK < squares[indexI][indexJ].size()-1)
+                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK+1])/2);
+            else
+                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK-1])/2);
+            path.push_back(point);
+            qDebug() << "counter = " << counter << "max = " << squares[indexI][indexJ].size();
+            if (counter > squares[indexI][indexJ].size()) {
+                rotation=false;
+                counter = 0;
+                scanned = true;
+                break;
+            }
+        }
+        scanned = false;
+        qDebug() << "Added line with length = " << minLine.length() ;
+            }
+    }
 
     path.push_back(airportPoint);
     qDebug() << path;
 
 
-
+    // ===================================
+    // Drawing Lines
     qreal length = 0.0;
     for (int i = 0; i < path.size()-1; i++) {
         QPointF point1 = path[i],

@@ -57,7 +57,7 @@ void Plane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->setPen(Qt::NoPen);
     painter->setBrush(Qt::blue);
     painter->setOpacity(0.4);    
-    qreal radius = 15;
+    qreal radius = 16;
 //    painter->setCompositionMode(QPainter::CompositionMode_SourceIn);
 //    painter->drawEllipse(QPointF(0,-radius/2),radius/3,radius/2);
 //    painter->drawEllipse(QPointF(0,radius/2),radius/3,radius/2);
