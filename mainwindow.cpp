@@ -24,14 +24,30 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new Scene();
     ui->myView->setScene(scene);
     connect(scene, &Scene::mousePosChanged, this, &MainWindow::statusBarShowPos);
-
     connect(ui->actionStartSimFlight, &QAction::triggered, this, &MainWindow::startSimFlight);
+
+//    scene->setBackgroundBrush(QBrush(Qt::cyan));
+    addGeoService();
+
+
+    //    timer->start(5);
+    //    scene->setBackgroundBrush(QBrush(QPixmap("map.png")));
 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::addGeoService()
+{
+    QStringList services =  QGeoServiceProvider::availableServiceProviders();
+    if (!services.isEmpty()) {
+        qDebug() << services;
+    }
+
+//    QGraphicsGeoMap
 }
 
 void MainWindow::openFile()

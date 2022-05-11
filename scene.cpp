@@ -144,7 +144,6 @@ void Scene::computeWaypoints()
     _line = QLineF(path.back(), Zones[0][0]);
     minLine = _line;
     maxLine = _line;
-    QVector<int> indexes;
 
     for (int i = 0; i < Zones.size(); i++) {
         for(int j = 0; j < Zones[i].size(); j++) {
@@ -217,112 +216,199 @@ void Scene::computeWaypoints()
     QPointF enterPoint;
     QVector<QVector<QPointF> > squares;
     QVector<QPointF> enterPoints;
-
+    QVector<int> indexes;
+    qreal radius=20; //plane scan radius;
     for (int i = 0; i < Zones.size(); i++) {
         for (int j = 0; j < Zones[i].size(); j++) {
             qDebug() << "Enterpoint #" << j << " = "<<Zones[i][j];
-            if(j == Zones[i].size()-1)
-                enterPoint = QPointF((Zones[i][j]+Zones[i][0])/2);
-            else
-                enterPoint = QPointF((Zones[i][j]+Zones[i][j+1])/2);
-            enterPoints.push_back(enterPoint);
+            if(j == Zones[i].size()-1) {
+                qreal len = QLineF(Zones[i][j],Zones[i][0]).length();
+                int k =1;
+                do {
+                    //                    (int k = 1; k < (int)len/radius; k++)
+                    int numberOfPoints = (int)(len/radius+1);
+                    if (numberOfPoints < 2)
+                        numberOfPoints = 2;
+                    if (Zones[i][j].rx() == Zones[i][0].rx()) {
+                        if (Zones[i][j].ry() < Zones[i][0].ry())
+                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
+                        else
+                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][0].ry()+k*len/numberOfPoints);
+                    } if (Zones[i][j].ry() == Zones[i][0].ry()) {
+                        if (Zones[i][j].rx() < Zones[i][0].rx())
+                            enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                        else
+                            enterPoint = QPointF(Zones[i][0].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                    }
+                    addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5)));
+                    enterPoints.push_back(enterPoint);
+                    k++;
+                } while(k<(int)len/radius);
+            }
+            else {
+                qreal len = QLineF(Zones[i][j],Zones[i][j+1]).length();
+                int k = 1;
+                do {
+                    //                    (int k = 1; k < (int)len/radius; k++)
+                    int numberOfPoints = (int)(len/radius+1);
+                    if (numberOfPoints < 2)
+                        numberOfPoints = 2;
+                    if (Zones[i][j].rx() == Zones[i][j+1].rx()) {
+                        if (Zones[i][j].ry() < Zones[i][j+1].ry())
+                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
+                        else
+                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j+1].ry()+k*len/numberOfPoints);
+                    } if (Zones[i][j].ry() == Zones[i][j+1].ry()) {
+                        if (Zones[i][j].rx() < Zones[i][j+1].rx())
+                            enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                        else
+                            enterPoint = QPointF(Zones[i][j+1].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                    }
+                    addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5))); ///////////////////////////////////////
+                    enterPoints.push_back(enterPoint);
+                    k++;
+                }while(k <(int)len/radius);
+            }
         }
-        qDebug() << "\nEnterPoints\n" << enterPoints << "\n\n\n\n\n\n";
+        qDebug() << "\nEnterPoints\n" << enterPoints << "\n\n\n\n";
         squares.push_back(enterPoints);
         enterPoints.clear();
     }
+
+    for (int i = 0; i < squares.size();i++) {
+        maxLine.setLength(0.0);
+        for(int j = 0; j < squares[i].size();j++) {
+            _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
+            if(_line.length() > maxLine.length())
+                maxLine = _line;
+        }
+    }
+
+
+
+
+
+
+
     //_line = QLineF(path.back(), squares[0][0]);
     //minLine = _line;
     _line = QLineF(path.back(), squares[0][0]);
     minLine = _line;
 
-    int indexI = 0, indexJ = 0;
-    for (int i = 0; i < squares.size(); i++) {
+    int indexI = -1, indexJ = -1;
+    for (int k = 0; k < squares.size();k++) {
         minLine.setLength(10000);
-        for (int j = 0; j < squares[i].size(); j++) {
-            _line = QLineF(path.back(),squares[i][j]);
-            if (_line.length() <= minLine.length()) {
-                minLine = _line;
-                indexI = i;
-                indexJ = j;
+        for (int i = 0; i < squares.size(); i++) {
+            maxLine.setLength(0.0);
+
+            qDebug() << "NEXT";
+            for (int j = 0; j < squares[i].size(); j++) {
+                if (indexes.contains(i))
+                    break;
+                _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
+                if(_line.length() > maxLine.length()) {
+                    maxLine = _line;
+
+
+                    _line = QLineF(path.back(),squares[i][j]);
+                    //                qDebug() << "_Line = " << _line.length();
+                    //     qDebug() << "minLine = " << minLine.length();
+                    if (_line.length() <= minLine.length()) {
+                        qDebug() << "True";
+                        minLine = _line;
+                        indexI = i;
+                        indexJ = j;
+
+                    }
+                }
             }
         }
-
+        indexes.push_back(indexI);
+        path.push_back(squares[indexI][indexJ]);
+        //offset;
+        path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()]);
+        qDebug() << "Added line with length = " << minLine.length() ;
     }
-    path.push_back(_line.p2());
-    path.push_back(squares[indexI][(indexJ+2)%4]);
 
 
+    path.push_back(airportPoint);
     qDebug() << path;
+
+
+
+    qreal length = 0.0;
     for (int i = 0; i < path.size()-1; i++) {
         QPointF point1 = path[i],
                 point2 = path[i+1];
         _line = QLineF(point1,point2);
         QGraphicsLineItem *linePath = new QGraphicsLineItem(_line);
         linePath->setPen(QPen(Qt::darkGreen,0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-
+        length += _line.length();
         addItem(linePath);
     }
+    qDebug() << "Path length = " << length;
 
 }
 
 void Scene::createWaypointsInZone(int zoneIndex, QPointF entrancePoint, QPointF exitPoint)
 {
-    QVector<QGraphicsEllipseItem *> circles;
-    qreal ellipseRadius = 1.0;
-    for (int k = 0; k < Zones.size(); k++) {
-        qreal X, Y, maxX= -1, maxY = -1, minX = 100000, minY = 100000;
-        for(int j = 0; j < Zones[k].size(); j++) {
-            if (Zones[k][j].rx() > maxX)
-                maxX = Zones[k][j].rx();
-            if (Zones[k][j].rx() < minX)
-                minX = Zones[k][j].rx();
-            if (Zones[k][j].ry() > maxY)
-                maxY = Zones[k][j].ry();
-            if (Zones[k][j].ry() < minY)
-                minY = Zones[k][j].ry();
+    //    Q_UNUSED(entrancePoint)
+    //    Q_UNUSED(exitPoint)
+    //    QVector<QGraphicsEllipseItem *> circles;
+    //    qreal ellipseRadius = 1.0;
+    //    for (int k = 0; k < Zones.size(); k++) {
+    //        qreal X, Y, maxX= -1, maxY = -1, minX = 100000, minY = 100000;
+    //        for(int j = 0; j < Zones[k].size(); j++) {
+    //            if (Zones[k][j].rx() > maxX)
+    //                maxX = Zones[k][j].rx();
+    //            if (Zones[k][j].rx() < minX)
+    //                minX = Zones[k][j].rx();
+    //            if (Zones[k][j].ry() > maxY)
+    //                maxY = Zones[k][j].ry();
+    //            if (Zones[k][j].ry() < minY)
+    //                minY = Zones[k][j].ry();
 
-        }
-        QLineF line = QLineF(QPointF(minX,minY), QPointF(maxX, maxY));
-        qDebug() << line;
-        QGraphicsRectItem * rect = new QGraphicsRectItem(QRectF(QPointF(minX,minY),QPointF(maxX,maxY)));
-        rect->setBrush(Qt::NoBrush);
-        //        addItem(rect);
-        QGraphicsEllipseItem *ellipse ;
-        int iter = 0;
-        int freq = 8;
-        for (qreal i = rect->rect().topLeft().rx();
-             i < rect->rect().bottomRight().rx();
-             i +=rect->rect().width() / (sqrt(3) * ellipseRadius) / freq) {
-            for (qreal j = /*(iter%2 == 0) ? */rect->rect().topLeft().ry()/* : rect->rect().topLeft().ry() + rect->rect().height() / (3 * ellipseRadius/2)*/;
-                 j <= rect->rect().bottomRight().ry();
-                 j += rect->rect().height() / (sqrt(3) * ellipseRadius) / freq) {
-                ellipse = new QGraphicsEllipseItem(QRectF(QPointF(i-ellipseRadius,j-ellipseRadius),QPointF(i+ellipseRadius,j+ellipseRadius)));
-                circles.push_back(ellipse);
-                ellipse->setOpacity(0.1);
-                addItem(ellipse);
+    //        }
+    //        QLineF line = QLineF(QPointF(minX,minY), QPointF(maxX, maxY));
+    //        qDebug() << line;
+    //        QGraphicsRectItem * rect = new QGraphicsRectItem(QRectF(QPointF(minX,minY),QPointF(maxX,maxY)));
+    //        rect->setBrush(Qt::NoBrush);
+    //        //        addItem(rect);
+    //        QGraphicsEllipseItem *ellipse ;
+    //        int iter = 0;
+    //        int freq = 8;
+    //        for (qreal i = rect->rect().topLeft().rx();
+    //             i < rect->rect().bottomRight().rx();
+    //             i +=rect->rect().width() / (sqrt(3) * ellipseRadius) / freq) {
+    //            for (qreal j = /*(iter%2 == 0) ? */rect->rect().topLeft().ry()/* : rect->rect().topLeft().ry() + rect->rect().height() / (3 * ellipseRadius/2)*/;
+    //                 j <= rect->rect().bottomRight().ry();
+    //                 j += rect->rect().height() / (sqrt(3) * ellipseRadius) / freq) {
+    //                ellipse = new QGraphicsEllipseItem(QRectF(QPointF(i-ellipseRadius,j-ellipseRadius),QPointF(i+ellipseRadius,j+ellipseRadius)));
+    //                circles.push_back(ellipse);
+    //                ellipse->setOpacity(0.1);
+    //                addItem(ellipse);
 
-            }
-            iter++;
-        }
-    }
-    // distance between X = sqrt(3) * radius
-    // distance between Y = 3 * radius / 2
-    // number of circles =  X * Y / pow(radius,2) * 2 / 3 * sqrt(3)
+    //            }
+    //            iter++;
+    //        }
+    //    }
+    //    // distance between X = sqrt(3) * radius
+    //    // distance between Y = 3 * radius / 2
+    //    // number of circles =  X * Y / pow(radius,2) * 2 / 3 * sqrt(3)
 
 
 
-    QList<QGraphicsItem *> list = polygons[zoneIndex]->collidingItems();
-    foreach (QGraphicsItem * it, list){
-        QGraphicsEllipseItem*  item = static_cast<QGraphicsEllipseItem*>(it);
-        if (item)
-            item->setOpacity(0.80);
+    //    QList<QGraphicsItem *> list = polygons[zoneIndex]->collidingItems();
+    //    foreach (QGraphicsItem * it, list){
+    //        QGraphicsEllipseItem*  item = static_cast<QGraphicsEllipseItem*>(it);
+    //        if (item)
+    //            item->setOpacity(0.80);
 
-    }
-    //    polygons[zoneIndex]->setOpacity(0);
-    foreach (QGraphicsEllipseItem* ell, circles)
-        if (ell->opacity() == 0.1)
-            removeItem(ell);
+    //    }
+    //    //    polygons[zoneIndex]->setOpacity(0);
+    //    foreach (QGraphicsEllipseItem* ell, circles)
+    //        if (ell->opacity() == 0.1)
+    //            removeItem(ell);
 
 
 
@@ -542,6 +628,7 @@ void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         zoneChanged = true;
         completeZone();
     }
+    Q_UNUSED(event)
 }
 
 

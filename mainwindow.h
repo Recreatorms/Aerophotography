@@ -4,6 +4,14 @@
 #include <QMainWindow>
 #include <QAction>
 #include <QTimer>
+#include <QDebug>
+#include <qdebug.h>
+#include <QtQml>
+
+#include <QtLocation/QGeoServiceProvider>
+
+//#include <QtLocation/QGeoServiceProvider>
+//#include <QtLocation/qgeoserviceprovider.h>
 #include "scene.h"
 #include "planemenu.h"
 #include "graphicsviewzoom.h"
@@ -19,6 +27,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void addGeoService();
 
 private slots:
     void openFile();
