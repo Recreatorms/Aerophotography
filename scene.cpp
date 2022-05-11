@@ -1,682 +1,654 @@
 #include "scene.h"
 
 Scene::Scene() :
-    QGraphicsScene()
+  QGraphicsScene()
 {
-    setSceneRect(0,0,100,100);
-    plane = nullptr;
-    rectItem = nullptr;
-    lineItem = nullptr;
-    lineItemPrev = nullptr;
-    lineItemNext = nullptr;
-    textPos = "";
+  setSceneRect(0,0,100,100);
+  plane = nullptr;
+  rectItem = nullptr;
+  lineItem = nullptr;
+  lineItemPrev = nullptr;
+  lineItemNext = nullptr;
+  textPos = "";
 }
 
 Scene::~Scene()
 {
-    points.clear();
-    Zones.clear();
-    for(int i = 0; i < ellipses.size();i++)
-        this->removeItem(ellipses[i]);
-    ellipses.clear();
-    for(int i = 0; i < polygons.size();i++)
-        this->removeItem(polygons[i]);
-    polygons.clear();
+  points.clear();
+  Zones.clear();
+  for(int i = 0; i < ellipses.size();i++)
+    this->removeItem(ellipses[i]);
+  ellipses.clear();
+  for(int i = 0; i < polygons.size();i++)
+    this->removeItem(polygons[i]);
+  polygons.clear();
 }
 void Scene::addZone()
 {
-    msg = "\tAdding Zone";
-    mouseEnable = true;
-    changingZone = false;
-    settingAirport = false;
+  msg = "\tAdding Zone";
+  mouseEnable = true;
+  changingZone = false;
+  settingAirport = false;
 }
 
 void Scene::changeZone()
 {
-    msg = "\tChanging Zone";
-    mouseEnable = true;
-    changingZone = true;
-    settingAirport = false;
+  msg = "\tChanging Zone";
+  mouseEnable = true;
+  changingZone = true;
+  settingAirport = false;
 }
 
 void Scene::deleteZone()
 {
-    msg = "\tDeleting Zone";
-    mouseEnable = true;
-    changingZone = false;
-    deletingZone = true;
-    settingAirport = false;
+  msg = "\tDeleting Zone";
+  mouseEnable = true;
+  changingZone = false;
+  deletingZone = true;
+  settingAirport = false;
 }
 
 void Scene::createAirport()
 {
-    msg = "\tSetting up Airport";
-    mouseEnable = true;
-    changingZone = false;
-    deletingZone = false;
-    settingAirport = true;
+  msg = "\tSetting up Airport";
+  mouseEnable = true;
+  changingZone = false;
+  deletingZone = false;
+  settingAirport = true;
 }
 
 void Scene::clearAll()
 {
-    msg = "";
-    mouseEnable = false;
-    changingZone = false;
-    deletingZone = false;
-    settingAirport = false;
-    Zones.clear();
-    lines.clear();
-    points.clear();
-    ellipses.clear();
-    polygons.clear();
-    path.clear();
-    while (items().size() != 0)
-        removeItem(static_cast<QGraphicsItem*>(items().back()));
+  msg = "";
+  mouseEnable = false;
+  changingZone = false;
+  deletingZone = false;
+  settingAirport = false;
+  Zones.clear();
+  lines.clear();
+  points.clear();
+  ellipses.clear();
+  polygons.clear();
+  path.clear();
+  while (items().size() != 0)
+    removeItem(static_cast<QGraphicsItem*>(items().back()));
 
-    //    for(int i = 0; i < polygons.size();i++)
-    //        if (polygons[i] == itemAt(event->scenePos(),QTransform())){
-    //            indexToChangeZone = i;
-    //            removeItem(polygons[indexToChangeZone]);
-    //            Zones.erase(Zones.begin()+indexToChangeZone);
-    //            polygons.erase(polygons.begin() +indexToChangeZone);
+  //    for(int i = 0; i < polygons.size();i++)
+  //        if (polygons[i] == itemAt(event->scenePos(),QTransform())){
+  //            indexToChangeZone = i;
+  //            removeItem(polygons[indexToChangeZone]);
+  //            Zones.erase(Zones.begin()+indexToChangeZone);
+  //            polygons.erase(polygons.begin() +indexToChangeZone);
 
-    //        }
+  //        }
 
 }
 void Scene::completeZone()
 {
-    points.clear();
-    points.push_back(rectItem->rect().topLeft());
-    points.push_back(rectItem->rect().topRight());
-    points.push_back(rectItem->rect().bottomRight());
-    points.push_back(rectItem->rect().bottomLeft());
-    if (!zoneChanged)
-        Zones.push_back(points);
-    else {
-        Zones[indexToChangeZone].swap(points);
+  points.clear();
+  points.push_back(rectItem->rect().topLeft());
+  points.push_back(rectItem->rect().topRight());
+  points.push_back(rectItem->rect().bottomRight());
+  points.push_back(rectItem->rect().bottomLeft());
+  if (!zoneChanged)
+    Zones.push_back(points);
+  else {
+      Zones[indexToChangeZone].swap(points);
 
     }
-    for(int i = 0; i < ellipses.size();i++)
-        this->removeItem(ellipses[i]);
-    ellipses.clear();
-    points.clear(); /////////////////////
-    for(int i = 0; i < lines.size(); i++)
-        this->removeItem(lines[i]);
-    lines.clear();
-    removeItem(lineItem);
+  for(int i = 0; i < ellipses.size();i++)
+    this->removeItem(ellipses[i]);
+  ellipses.clear();
+  points.clear(); /////////////////////
+  for(int i = 0; i < lines.size(); i++)
+    this->removeItem(lines[i]);
+  lines.clear();
+  removeItem(lineItem);
 
-    removeItem(rectItem);
+  removeItem(rectItem);
 
-    if(!zoneChanged) {
-        QGraphicsPolygonItem *polygon = new QGraphicsPolygonItem(QPolygonF(Zones.back()));
-        polygon->setOpacity(0.5);
-        polygon->setBrush(QBrush(Qt::yellow));
-        polygon->setPen(Qt::NoPen);
-        polygons.push_back(polygon);
-        this->addItem(polygon);
+  if(!zoneChanged) {
+      QGraphicsPolygonItem *polygon = new QGraphicsPolygonItem(QPolygonF(Zones.back()));
+      polygon->setOpacity(0.5);
+      polygon->setBrush(QBrush(Qt::yellow));
+      polygon->setPen(Qt::NoPen);
+      polygons.push_back(polygon);
+      this->addItem(polygon);
     } else {
-        removeItem(lineItemPrev);
-        removeItem(lineItemNext);
-        removeItem(polygons[indexToChangeZone]);
-        polygons.removeAt(indexToChangeZone);
-        QGraphicsPolygonItem *polygon = new QGraphicsPolygonItem(QPolygonF(Zones[indexToChangeZone]));
-        polygon->setOpacity(0.5);
-        polygon->setBrush(QBrush(Qt::yellow));
-        polygon->setPen(Qt::NoPen);
-        polygons.insert(indexToChangeZone,polygon);
-        this->addItem(polygon);
+      removeItem(lineItemPrev);
+      removeItem(lineItemNext);
+      removeItem(polygons[indexToChangeZone]);
+      polygons.removeAt(indexToChangeZone);
+      QGraphicsPolygonItem *polygon = new QGraphicsPolygonItem(QPolygonF(Zones[indexToChangeZone]));
+      polygon->setOpacity(0.5);
+      polygon->setBrush(QBrush(Qt::yellow));
+      polygon->setPen(Qt::NoPen);
+      polygons.insert(indexToChangeZone,polygon);
+      this->addItem(polygon);
     }
-    zoneCompleted = true;
-    zoneChanged = false;
-    pointsCreated = false;
+  zoneCompleted = true;
+  zoneChanged = false;
+  pointsCreated = false;
 }
 
 
-void Scene::computeWaypoints()
+void Scene::computePath()
 {
-    if (Zones.isEmpty())
-        return;
+  if (Zones.isEmpty())
+    return;
+  QVector<int> indexes;
+  int offsetDistance = 15;
+  int number_of_points_on_side_1, number_of_points_on_side_2;
+  QPointF entrancePoint, exitPoint;
+  QLineF _line, minLine;
 
-    QLineF _line, minLine, maxLine;
-    path.push_back(airportPoint);
-    /*
-    int zoneIndex = 0;
-    _line = QLineF(path.back(), Zones[0][0]);
-    minLine = _line;
-    maxLine = _line;
+  // ====================================================
+  // Creating points on the borders of the Zones
 
-    for (int i = 0; i < Zones.size(); i++) {
-        for(int j = 0; j < Zones[i].size(); j++) {
-            _line = QLineF(path.back(), Zones[i][j]);
-            if (_line.length() < minLine.length()) {
-                minLine = _line;
-                zoneIndex = i;
-                //                polygons[i]->
+  createWaypointsInZone();
+  // ====================================
+  // Creating Path
 
-            }
-            //                        if (_line.length() > maxLine.length())
-            //                            maxLine = _line;
-        }
-    }
-    path.push_back(minLine.p2());
-    qDebug() << path;
-    indexes.push_back(zoneIndex);
-    int nextZoneIndex = -1;
-    if (Zones.size() > 1) {
-        for (int i = 0; i < Zones.size()-1; i++) {
-            qDebug() << "Cycle continues...";
-            minLine.setLength(100000.0);
-            for (int j = 0; j < Zones[zoneIndex].size(); j++) {
-                for (int n = 0; n < Zones.size(); n++)
-                    for(int k = 0; k < Zones[n].size(); k++)
-                        if (!indexes.contains(n))
-                            if (!path.contains(Zones[n][k])){
-                                _line = QLineF(Zones[zoneIndex][j], Zones[n][k]);
-                                if (_line.length() < minLine.length()) {
-                                    minLine = _line;
-                                    nextZoneIndex = n;
-                                }
+  path.push_back(airportPoint);
+  QPainterPath myPainterPath(path.back());
+  for (int i = 0; i < squares.size(); i++) {
+      int indexI = -1, indexJ = -1, indexK = -1, counter = 0;
+      _line = QLineF(path.back(), squares[0][0][0]);
+      minLine = _line;
+      minLine.setLength(100000.0);
+
+
+      // CYCLE FOR CREATING AN INITIAL POINT
+      for (int j = 0; j < squares[i].size(); j++) { // <---------------- число сторон на области (default = 4)
+          if (indexes.contains(i))
+            break;
+          for (int k = 0; k < squares[i][j].size();k++) { // <----------- число точек на одной грани
+
+              _line = QLineF(path.back(),squares[i][j][k]);
+              if (_line.length() < minLine.length()) {
+                  minLine = _line;
+                  indexI = i;
+                  indexJ = j;
+                  number_of_points_on_side_1 = squares[indexI][indexJ].size();
+                  number_of_points_on_side_2 = squares[indexI][(indexJ+1)%squares[indexI].size()].size();
+                  if (number_of_points_on_side_1 < number_of_points_on_side_2) { // if(_line.length() > maxLine.length()) {
+                      // choosing indexJ side
+                      // BUT
+                      //                      if (QLineF(squares[indexI][indexJ][k], squares[indexI][(indexJ+1)%squares[indexI].size()][0]                               ).length() < minLine.length() ||
+                      //                          QLineF(squares[indexI][indexJ][k], squares[indexI][(indexJ+1)%squares[indexI].size()][squares[indexI][indexJ].size()-1]).length() < minLine.length() ||
+                      //                          QLineF(squares[indexI][indexJ][k], squares[indexI][(indexJ-1)%squares[indexI].size()][0]                               ).length() < minLine.length() ||
+                      //                          QLineF(squares[indexI][indexJ][k], squares[indexI][(indexJ-1)%squares[indexI].size()][squares[indexI][indexJ].size()-1]).length() < minLine.length() )
+                      //                        { // случай №5
+                      //                        }
+                      indexK = k;
+                      entrancePoint = squares[indexI][indexJ][indexK]; // Входная точка - которая уже на искомой зоне
+                      exitPoint     = squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][indexK]; // Выходная точка
+
+                    } else {
+                      QLineF minLine2 = minLine;
+                      minLine2.setLength(10000);
+                      for (int k2 = 0; k2 < squares[indexI][(indexJ+1)%squares[indexI].size()].size(); k2++) {
+                          _line = QLineF(path.back(),squares[indexI][indexJ][k2]);
+                          if (_line.length() < minLine2.length()) {
+                              minLine2 = _line;
+                              indexK = k2;
                             }
-            }
-
-            if (!path.contains(minLine.p1()))
-                path.push_back(minLine.p1());
-            //createWaypointsInZone(zoneIndex, path[path.size()-2], path.back());
-            if (!path.contains(minLine.p2()))
-                path.push_back(minLine.p2());
-            //...
-            //...
-            //...
-            //waypoints.back()
-
-            qDebug () << "Current Zone was " << zoneIndex;
-            qDebug () << "Next Zone is " << nextZoneIndex;
-
-            zoneIndex = nextZoneIndex;
-            indexes.push_back(zoneIndex);
-            qDebug() << "Now path looks like \n" << path;
-        }
-
-        //        path.pop_back();
-        minLine.setLength(100000.0);
-        for (int i = 0; i < Zones[zoneIndex].size(); i++) {
-            _line = QLineF(Zones[zoneIndex][i], path[0]);
-            if(_line.length() <minLine.length())
-                minLine = _line;
-        }
-        if (!path.contains(minLine.p1()))
-            path.push_back(_line.p1());
-        path.push_back(_line.p2()); //airportPoint
-        // createWaypointsInZone(zoneIndex, path.back(),path.back());
-    } else
-        //createWaypointsInZone(zoneIndex, path.back(),path.back());
-
-
-        */
-
-
-
-    // ====================================================
-    // Creating points on the borders of the Zones
-
-    QVector<QVector<QVector<QPointF> > > squares;
-    QVector<QVector<QPointF> > border;
-    QVector<QPointF> pointsOnBorder;
-    QPointF enterPoint;
-    QVector<int> indexes;
-    qreal radius=20; //plane scan radius;
-    for (int i = 0; i < Zones.size(); i++) {
-        for (int j = 0; j < Zones[i].size(); j++) {
-            qDebug() << "Enterpoint #" << j << " = "<<Zones[i][j];
-            if(j == Zones[i].size()-1) {
-                qreal len = QLineF(Zones[i][j],Zones[i][0]).length();
-                int k =1;
-                do {
-                    //                    (int k = 1; k < (int)len/radius; k++)
-                    int numberOfPoints = (int)(len/radius+1);
-                    if (numberOfPoints < 2)
-                        numberOfPoints = 2;
-                    if (Zones[i][j].rx() == Zones[i][0].rx()) {
-                        if (Zones[i][j].ry() < Zones[i][0].ry())
-                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
-                        else
-                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][0].ry()+k*len/numberOfPoints);
-                    } if (Zones[i][j].ry() == Zones[i][0].ry()) {
-                        if (Zones[i][j].rx() < Zones[i][0].rx())
-                            enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
-                        else
-                            enterPoint = QPointF(Zones[i][0].rx()+k*len/numberOfPoints,Zones[i][j].ry());
-                    }
-                    addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5)));
-                    pointsOnBorder.push_back(enterPoint);
-                    k++;
-                } while(k<(int)len/radius);
-                border.push_back(pointsOnBorder);
-                pointsOnBorder.clear();
-            }
-            else {
-                qreal len = QLineF(Zones[i][j],Zones[i][j+1]).length();
-                int k = 1;
-                do {
-                    //                    (int k = 1; k < (int)len/radius; k++)
-                    int numberOfPoints = (int)(len/radius+1);
-                    if (numberOfPoints < 2)
-                        numberOfPoints = 2;
-                    if (Zones[i][j].rx() == Zones[i][j+1].rx()) {
-                        if (Zones[i][j].ry() < Zones[i][j+1].ry())
-                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
-                        else
-                            enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j+1].ry()+k*len/numberOfPoints);
-                    } if (Zones[i][j].ry() == Zones[i][j+1].ry()) {
-                        if (Zones[i][j].rx() < Zones[i][j+1].rx())
-                            enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
-                        else
-                            enterPoint = QPointF(Zones[i][j+1].rx()+k*len/numberOfPoints,Zones[i][j].ry());
-                    }
-                    addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5))); ///////////////////////////////////////
-                    pointsOnBorder.push_back(enterPoint);
-                    k++;
-                } while(k <(int)len/radius);
-                border.push_back(pointsOnBorder);
-                pointsOnBorder.clear();
-            }
-        }
-        qDebug() << "\nEnterPoints\n" << border << "\n\n\n\n";
-        squares.push_back(border);
-        border.clear();
-    }
-    qDebug() << "squares = " << squares;
-
-    // ====================================
-    // Creating Path
-
-    //    for (int i = 0; i < squares.size();i++) {
-    //        maxLine.setLength(0.0);
-    //        for(int j = 0; j < squares[i].size();j++) {
-    //            for(int k = 0; k < squares[i][j].size();k++)
-    //                _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][/*squares[i][(j+squares[i].size()/2)%squares[i].size()].size()-1-k*/k]);
-    //            //            _line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
-    //            if(_line.length() > maxLine.length())
-    //                maxLine = _line;
-    //        }
-    //    }
-
-    _line = QLineF(path.back(), squares[0][0][0]);
-    minLine = _line;
-    bool rotation = false,
-            scanned = false;
-    int indexI = -1, indexJ = -1, indexK = -1, counter = 0;
-    for (int i = 0; i < squares.size(); i++) { //  <--------------------------- надо поменять ограничение на цикл либо полностью менять
-        minLine.setLength(0.0);
-        qDebug() << "Next square";
-            while (!scanned) {
-//        for (int n = 0; n < squares.size();n++) {
-            maxLine.setLength(0.0);
-
-            for (int j = 0; j < squares[i].size(); j++) { // <---------------- число сторон на области (default = 4)
-                qDebug() << "Next border";
-                for (int k = 0; k < squares[i][j].size();k++) { // <----------- число точек на одной грани
-                    if(!rotation)
-                        if (indexes.contains(i))
-                            break;
-
-                    _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][/*squares[i][(j+squares[i].size()/2)%squares[i].size()].size()-1-k*/k]);
-                    //_line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
-                    if(_line.length() > maxLine.length()) {
-                        maxLine = _line;
-
-
-//                        _line = QLineF(path.back(),squares[i][j][k]);
-                        //                qDebug() << "_Line = " << _line.length();
-                        //     qDebug() << "minLine = " << minLine.length();
-                        //                        if (_line.length() < minLine.length()) {
-                        qDebug() << "looking good";
-//                        minLine = _line;
-                        indexI = i;
-                        indexJ = j;
-                        indexK = k;
-                        if (!rotation)
-                            break;
-                        if (indexK < squares[indexI][indexJ].size()-1)
-                            indexK++;
-                        else {
-//                            indexK--;
-                            rotation = false;
                         }
-//                        }
+                      indexJ = (indexJ+1)%squares[indexI].size();
+                      entrancePoint = squares[indexI][indexJ][indexK]; // Входная точка - которая уже на искомой зоне
+                      exitPoint     = squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][indexK]; // Выходная точка
                     }
                 }
             }
+        }
 
-        qDebug() << "added new waypoint with\nindexI = " << indexI << "\nindexJ = " << indexJ << "\nindexK = "<< indexK;
-        indexes.push_back(indexI);
-        path.push_back(squares[indexI][indexJ][indexK]);
-        //        offset;
-        path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][/*squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()].size()-1-indexK*/indexK]);
-        if (squares[indexI][indexJ].size() > 1) {
-            qDebug() << "we need another point on same border";
-            //switch(indexJ < (indexJ+squares[indexI].size()/2)%squares[indexI].size()indexJ) up down left right
-            indexJ = (indexJ+squares[indexI].size()/2)%squares[indexI].size();
-            rotation = true;
-            counter++;
-            QPointF point;
-            if(indexK < squares[indexI][indexJ].size()-1)
-                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK+1])/2);
-            else
-                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK-1])/2);
-            path.push_back(point);
-            qDebug() << "counter = " << counter << "max = " << squares[indexI][indexJ].size();
-            if (counter > squares[indexI][indexJ].size()) {
-                rotation = false;
-                counter = 0;
-                scanned = true;
-                break;
+
+      qDebug() << "added new waypoint with\nindexI = " << indexI << "\nindexJ = " << indexJ << "\nindexK = "<< indexK;
+      indexes.push_back(indexI);
+
+      QPointF offsetPoint = entrancePoint;
+
+
+      if (entrancePoint.rx() > exitPoint.rx())
+        offsetPoint.setX(offsetPoint.rx()+offsetDistance); ;
+      if (entrancePoint.ry() > exitPoint.ry())
+        offsetPoint.setY(offsetPoint.ry()+offsetDistance);
+      if (entrancePoint.rx() < exitPoint.rx())
+        offsetPoint.setX(offsetPoint.rx()-offsetDistance);
+      if (entrancePoint.ry() < exitPoint.ry())
+        offsetPoint.setY(offsetPoint.ry()-offsetDistance);
+
+
+
+      if (!path.empty())
+        myPainterPath.cubicTo(path.back(), offsetPoint,entrancePoint);
+      else
+        myPainterPath.quadTo(offsetPoint, entrancePoint);
+
+      path.push_back(offsetPoint);
+      path.push_back(entrancePoint);
+      path.push_back(exitPoint);
+      myPainterPath.lineTo(path.back());
+      //  CYCLE FOR CLOSING A ZONE
+      //  IF IT HAS MORE THAT 1 POINT ON BORDER
+      if (squares[indexI][indexJ].size() > 1) {
+          qDebug() << "we need another point on same border";
+          bool scanComplete = false;
+          bool goingRight = false;
+          int initialIndexK = indexK;
+          counter = 1;
+          if (indexK < squares[indexI][indexJ].size()-1)
+            goingRight = true;
+          else
+            goingRight = false;
+          QPointF nextPoint, middlePoint, oppositeNextPoint;
+          while (!scanComplete) {
+              indexJ = (indexJ+squares[indexI].size()/2)%squares[indexI].size();
+              if (goingRight) {
+                  if (indexK+1 < squares[indexI][indexJ].size()) {
+                      middlePoint = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK+1])/2);
+
+                      nextPoint   = QPointF((squares[indexI][indexJ][indexK+1]));
+                      oppositeNextPoint = QPointF(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][indexK+1]);
+                      if (path.back().rx() == nextPoint.rx()) {
+                          if (path.back().rx() > oppositeNextPoint.rx())
+                            middlePoint.setX(middlePoint.rx()+offsetDistance*2/3);
+                          else
+                            middlePoint.setX(middlePoint.rx()-offsetDistance*2/3);
+                        }
+                      if (path.back().ry() == nextPoint.ry()) {
+                          if (path.back().ry() > oppositeNextPoint.ry())
+                            middlePoint.setY(middlePoint.ry()+offsetDistance*2/3);
+                          else
+                            middlePoint.setY(middlePoint.ry()-offsetDistance*2/3);
+                        }
+                      myPainterPath.quadTo(middlePoint,nextPoint);
+
+                      path.push_back(middlePoint);
+                      path.push_back(nextPoint);
+                      path.push_back(oppositeNextPoint);
+                      myPainterPath.lineTo(path.back());
+                      indexK = indexK+1;
+                      counter++;
+                    } else
+                    scanComplete = true;
+                }
+              else {
+                  if (indexK-1 > -1) {
+                      middlePoint = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK-1])/2);
+
+                      nextPoint   = QPointF((squares[indexI][indexJ][indexK-1]));
+                      oppositeNextPoint = QPointF(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][indexK-1]);
+                      if (path.back().rx() == nextPoint.rx()) {
+                          if (path.back().rx() > oppositeNextPoint.rx())
+                            middlePoint.setX(middlePoint.rx()+offsetDistance*2/3);
+                          else
+                            middlePoint.setX(middlePoint.rx()-offsetDistance*2/3);
+                        }
+                      if (path.back().ry() == nextPoint.ry()) {
+                          if (path.back().ry() > oppositeNextPoint.ry())
+                            middlePoint.setY(middlePoint.ry()+offsetDistance*2/3);
+                          else
+                            middlePoint.setY(middlePoint.ry()-offsetDistance*2/3);
+                        }
+
+                      myPainterPath.quadTo(middlePoint,nextPoint);
+
+                      path.push_back(middlePoint);
+                      path.push_back(nextPoint);
+                      path.push_back(oppositeNextPoint);
+                      myPainterPath.lineTo(path.back());
+                      indexK = indexK-1;
+                      counter++;
+                    } else
+                    scanComplete = true;
+                }
+
+              qDebug() << "counter = " << counter << "max = " << squares[indexI][indexJ].size();
+              if (scanComplete )
+                if (counter != squares[indexI][indexJ].size()) {
+                    scanComplete = false;
+                    goingRight = !goingRight;
+                    indexK = initialIndexK;
+                  }
             }
-        } else
-          scanned = true;
-        qDebug() << "Added line with length = " << minLine.length() ;
-            }
+
+          offsetPoint = path.back();
+          if (nextPoint.rx() > oppositeNextPoint.rx())
+            offsetPoint.setX(offsetPoint.rx()-offsetDistance); ;
+          if (nextPoint.ry() > oppositeNextPoint.ry())
+            offsetPoint.setY(offsetPoint.ry()-offsetDistance);
+          if (nextPoint.rx() < oppositeNextPoint.rx())
+            offsetPoint.setX(offsetPoint.rx()+offsetDistance);
+          if (nextPoint.ry() < oppositeNextPoint.ry())
+            offsetPoint.setY(offsetPoint.ry()+offsetDistance);
+
+          path.push_back(offsetPoint);
+
+
+        } else {
+
+          offsetPoint = exitPoint;
+          if (entrancePoint.rx() > exitPoint.rx())
+            offsetPoint.setX(offsetPoint.rx()-offsetDistance); ;
+          if (entrancePoint.ry() > exitPoint.ry())
+            offsetPoint.setY(offsetPoint.ry()-offsetDistance);
+          if (entrancePoint.rx() < exitPoint.rx())
+            offsetPoint.setX(offsetPoint.rx()+offsetDistance);
+          if (entrancePoint.ry() < exitPoint.ry())
+            offsetPoint.setY(offsetPoint.ry()+offsetDistance);
+
+          path.push_back(offsetPoint);
+        }
     }
-
-    path.push_back(airportPoint);
-    qDebug() << path;
+  qDebug() << "Added line with length = " << minLine.length() ;
 
 
-    // ===================================
-    // Drawing Lines
-    qreal length = 0.0;
-    for (int i = 0; i < path.size()-1; i++) {
-        QPointF point1 = path[i],
-                point2 = path[i+1];
-        _line = QLineF(point1,point2);
-        QGraphicsLineItem *linePath = new QGraphicsLineItem(_line);
-        linePath->setPen(QPen(Qt::darkGreen,0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        length += _line.length();
-        addItem(linePath);
-    }
-    qDebug() << "Path length = " << length;
+
+  myPainterPath.quadTo(path.back(),airportPoint);
+  path.push_back(airportPoint);
+
+  qDebug() << path;
+
+
+  // ===================================
+  // Drawing Lines
+  qreal length = 0.0;
+
+  addPath(myPainterPath);
+
+  qDebug() << "Path length = " << length;
 
 }
 
-void Scene::createWaypointsInZone(int zoneIndex, QPointF entrancePoint, QPointF exitPoint)
+void Scene::createWaypointsInZone()
 {
-    //    Q_UNUSED(entrancePoint)
-    //    Q_UNUSED(exitPoint)
-    //    QVector<QGraphicsEllipseItem *> circles;
-    //    qreal ellipseRadius = 1.0;
-    //    for (int k = 0; k < Zones.size(); k++) {
-    //        qreal X, Y, maxX= -1, maxY = -1, minX = 100000, minY = 100000;
-    //        for(int j = 0; j < Zones[k].size(); j++) {
-    //            if (Zones[k][j].rx() > maxX)
-    //                maxX = Zones[k][j].rx();
-    //            if (Zones[k][j].rx() < minX)
-    //                minX = Zones[k][j].rx();
-    //            if (Zones[k][j].ry() > maxY)
-    //                maxY = Zones[k][j].ry();
-    //            if (Zones[k][j].ry() < minY)
-    //                minY = Zones[k][j].ry();
+  //    Q_UNUSED(entrancePoint)
+  //    Q_UNUSED(exitPoint)
+  QVector<QVector<QPointF> > border;
+  QVector<QPointF> pointsOnBorder;
+  QPointF enterPoint;
 
-    //        }
-    //        QLineF line = QLineF(QPointF(minX,minY), QPointF(maxX, maxY));
-    //        qDebug() << line;
-    //        QGraphicsRectItem * rect = new QGraphicsRectItem(QRectF(QPointF(minX,minY),QPointF(maxX,maxY)));
-    //        rect->setBrush(Qt::NoBrush);
-    //        //        addItem(rect);
-    //        QGraphicsEllipseItem *ellipse ;
-    //        int iter = 0;
-    //        int freq = 8;
-    //        for (qreal i = rect->rect().topLeft().rx();
-    //             i < rect->rect().bottomRight().rx();
-    //             i +=rect->rect().width() / (sqrt(3) * ellipseRadius) / freq) {
-    //            for (qreal j = /*(iter%2 == 0) ? */rect->rect().topLeft().ry()/* : rect->rect().topLeft().ry() + rect->rect().height() / (3 * ellipseRadius/2)*/;
-    //                 j <= rect->rect().bottomRight().ry();
-    //                 j += rect->rect().height() / (sqrt(3) * ellipseRadius) / freq) {
-    //                ellipse = new QGraphicsEllipseItem(QRectF(QPointF(i-ellipseRadius,j-ellipseRadius),QPointF(i+ellipseRadius,j+ellipseRadius)));
-    //                circles.push_back(ellipse);
-    //                ellipse->setOpacity(0.1);
-    //                addItem(ellipse);
-
-    //            }
-    //            iter++;
-    //        }
-    //    }
-    //    // distance between X = sqrt(3) * radius
-    //    // distance between Y = 3 * radius / 2
-    //    // number of circles =  X * Y / pow(radius,2) * 2 / 3 * sqrt(3)
-
-
-
-    //    QList<QGraphicsItem *> list = polygons[zoneIndex]->collidingItems();
-    //    foreach (QGraphicsItem * it, list){
-    //        QGraphicsEllipseItem*  item = static_cast<QGraphicsEllipseItem*>(it);
-    //        if (item)
-    //            item->setOpacity(0.80);
-
-    //    }
-    //    //    polygons[zoneIndex]->setOpacity(0);
-    //    foreach (QGraphicsEllipseItem* ell, circles)
-    //        if (ell->opacity() == 0.1)
-    //            removeItem(ell);
-
-
+  qreal radius=30; //plane scan radius;
+  for (int i = 0; i < Zones.size(); i++) {
+      for (int j = 0; j < Zones[i].size(); j++) {
+          qDebug() << "Enterpoint #" << j << " = "<<Zones[i][j];
+          if(j == Zones[i].size()-1) {
+              qreal len = QLineF(Zones[i][j],Zones[i][0]).length();
+              int k =1;
+              int numberOfPoints = (int)(len/radius+1);
+              do {
+                  //                    (int k = 1; k < (int)len/radius; k++)
+                  if (numberOfPoints < 2)
+                    numberOfPoints = 2;
+                  if (Zones[i][j].rx() == Zones[i][0].rx()) {
+                      if (Zones[i][j].ry() < Zones[i][0].ry())
+                        enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
+                      else
+                        enterPoint = QPointF(Zones[i][j].rx(),Zones[i][0].ry()+k*len/numberOfPoints);
+                    } if (Zones[i][j].ry() == Zones[i][0].ry()) {
+                      if (Zones[i][j].rx() < Zones[i][0].rx())
+                        enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                      else
+                        enterPoint = QPointF(Zones[i][0].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                    }
+                  //                  addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5)));
+                  pointsOnBorder.push_back(enterPoint);
+                  k++;
+                } while(k<=(int)len/radius);
+              border.push_back(pointsOnBorder);
+              pointsOnBorder.clear();
+            }
+          else {
+              qreal len = QLineF(Zones[i][j],Zones[i][j+1]).length();
+              int k = 1;
+              int numberOfPoints = (int)(len/radius+1);
+              do {
+                  //                    (int k = 1; k < (int)len/radius; k++)
+                  if (numberOfPoints < 2)
+                    numberOfPoints = 2;
+                  if (Zones[i][j].rx() == Zones[i][j+1].rx()) {
+                      if (Zones[i][j].ry() < Zones[i][j+1].ry())
+                        enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j].ry()+k*len/numberOfPoints);
+                      else
+                        enterPoint = QPointF(Zones[i][j].rx(),Zones[i][j+1].ry()+k*len/numberOfPoints);
+                    } if (Zones[i][j].ry() == Zones[i][j+1].ry()) {
+                      if (Zones[i][j].rx() < Zones[i][j+1].rx())
+                        enterPoint = QPointF(Zones[i][j].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                      else
+                        enterPoint = QPointF(Zones[i][j+1].rx()+k*len/numberOfPoints,Zones[i][j].ry());
+                    }
+                  //                  addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.1,0.5))); ///////////////////////////////////////
+                  pointsOnBorder.push_back(enterPoint);
+                  k++;
+                } while(k <=(int)len/radius);
+              border.push_back(pointsOnBorder);
+              pointsOnBorder.clear();
+            }
+        }
+      qDebug() << "\nEnterPoints\n" << border << "\n\n\n\n";
+      squares.push_back(border);
+      border.clear();
+    }
+  qDebug() << "squares = " << squares;
 
 }
 
 void Scene::startSimFlight()
 {
-    if (path.isEmpty())
-        return;
-    plane = new Plane(this, airportPoint, path);
-    addItem(plane);
-    //    connect(plane, &Plane::stop, this, &Scene::stopSimFlightSlot);
+  if (path.isEmpty())
+    return;
+  plane = new Plane(this, airportPoint, path);
+  addItem(plane);
+  //    connect(plane, &Plane::stop, this, &Scene::stopSimFlightSlot);
 }
 
 void Scene::moveSimFlight()
 {
-    if (plane != nullptr)
-        plane->move();
+  if (plane != nullptr)
+    plane->move();
 
 }
 
 void Scene::addPort(QPointF pos)
 {
-    this->addEllipse(QRectF(QPointF(pos.x()-radius, pos.y()-radius), QPointF(pos.x()+radius, pos.y()+radius)));
-    airportPoint = pos;
+  this->addEllipse(QRectF(QPointF(pos.x()-radius, pos.y()-radius), QPointF(pos.x()+radius, pos.y()+radius)));
+  airportPoint = pos;
 }
 
 void Scene::createPoint(QPointF point)
 {
-    if (points.contains(point))
-        return;
-    points.push_back(point);
-    QGraphicsEllipseItem *ellipse = new QGraphicsEllipseItem(QRectF(QPointF(point.x()-radius, point.y()-radius), QPointF(point.x()+radius, point.y()+radius)));
-    ellipse->setPen(QPen(Qt::black, 0.5));
-    ellipse->setBrush(QBrush(Qt::yellow));
-    ellipses.push_back(ellipse);
-    addItem(ellipse);
-    qDebug() << point;
+  if (points.contains(point))
+    return;
+  points.push_back(point);
+  QGraphicsEllipseItem *ellipse = new QGraphicsEllipseItem(QRectF(QPointF(point.x()-radius, point.y()-radius), QPointF(point.x()+radius, point.y()+radius)));
+  ellipse->setPen(QPen(Qt::black, 0.5));
+  ellipse->setBrush(QBrush(Qt::yellow));
+  ellipses.push_back(ellipse);
+  addItem(ellipse);
+  qDebug() << point;
 }
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 
-    if (!mouseEnable)
-        return;
+  if (!mouseEnable)
+    return;
 
-    if (event->button() == Qt::RightButton) {
-        for(int i = 0; i < ellipses.size();i++)
-            this->removeItem(ellipses[i]);
-        ellipses.clear();
-        points.clear();
-        for(int i = 0; i < lines.size(); i++)
-            this->removeItem(lines[i]);
-        lines.clear();
-        removeItem(lineItem);
-        removeItem(rectItem);
-        if (changingZone) {
-            if (!polygons.isEmpty()) {
-                polygons[indexToChangeZone]->setBrush(Qt::yellow);
-                removeItem(lineItemNext);
-                removeItem(lineItemPrev);
+  if (event->button() == Qt::RightButton) {
+      for(int i = 0; i < ellipses.size();i++)
+        this->removeItem(ellipses[i]);
+      ellipses.clear();
+      points.clear();
+      for(int i = 0; i < lines.size(); i++)
+        this->removeItem(lines[i]);
+      lines.clear();
+      removeItem(lineItem);
+      removeItem(rectItem);
+      if (changingZone) {
+          if (!polygons.isEmpty()) {
+              polygons[indexToChangeZone]->setBrush(Qt::yellow);
+              removeItem(lineItemNext);
+              removeItem(lineItemPrev);
             }
-            if(dragging)
-                dragging=false;
+          if(dragging)
+            dragging=false;
         }
-        mouseEnable = false;
-        creatingLine = false;
-        changingZone = false;
-        pointsCreated = false;
-        deletingZone = false;
-        msg = "";
-        return;
+      mouseEnable = false;
+      creatingLine = false;
+      changingZone = false;
+      pointsCreated = false;
+      deletingZone = false;
+      msg = "";
+      return;
     }
-    if (deletingZone) {
+  if (deletingZone) {
+      for(int i = 0; i < polygons.size();i++)
+        if (polygons[i] == itemAt(event->scenePos(),QTransform())){
+            indexToChangeZone = i;
+            removeItem(polygons[indexToChangeZone]);
+            Zones.erase(Zones.begin()+indexToChangeZone);
+            polygons.erase(polygons.begin() +indexToChangeZone);
+
+          }
+      return;
+    }
+  if (changingZone) {
+
+      if(!pointsCreated)
         for(int i = 0; i < polygons.size();i++)
-            if (polygons[i] == itemAt(event->scenePos(),QTransform())){
-                indexToChangeZone = i;
-                removeItem(polygons[indexToChangeZone]);
-                Zones.erase(Zones.begin()+indexToChangeZone);
-                polygons.erase(polygons.begin() +indexToChangeZone);
-
+          if (polygons[i] == static_cast<QGraphicsPolygonItem*>(itemAt(event->scenePos(),QTransform()))) {
+              polygons[i]->setBrush(QBrush(Qt::red));
+              for (int j = 0; j < Zones[i].size(); j++)
+                createPoint(Zones[i][j]);
+              indexToChangeZone = i;
+              pointsCreated = true;
+              return;
             }
-        return;
-    }
-    if (changingZone) {
-
-        if(!pointsCreated)
-            for(int i = 0; i < polygons.size();i++)
-                if (polygons[i] == static_cast<QGraphicsPolygonItem*>(itemAt(event->scenePos(),QTransform()))) {
-                    polygons[i]->setBrush(QBrush(Qt::red));
-                    for (int j = 0; j < Zones[i].size(); j++)
-                        createPoint(Zones[i][j]);
-                    indexToChangeZone = i;
-                    pointsCreated = true;
-                    return;
-                }
-        if(!dragging)
-            for(int i = 0; i < ellipses.size(); i++)
-                if (ellipses[i] == static_cast <QGraphicsEllipseItem*>(itemAt(event->scenePos(),QTransform()))) {
-                    dragging = true;
-                    indexForDragEllipse = i;
-                    ellipses[indexForDragEllipse]->setBrush(QBrush(Qt::green));
-                    return;
-                }
-        return;
+      if(!dragging)
+        for(int i = 0; i < ellipses.size(); i++)
+          if (ellipses[i] == static_cast <QGraphicsEllipseItem*>(itemAt(event->scenePos(),QTransform()))) {
+              dragging = true;
+              indexForDragEllipse = i;
+              ellipses[indexForDragEllipse]->setBrush(QBrush(Qt::green));
+              return;
+            }
+      return;
     }
 
-    if (settingAirport) {
-        if (!airportExists) {
-            addPort(event->scenePos());
-            airportExists = true;
-            settingAirport = false;
-            msg = "";
+  if (settingAirport) {
+      if (!airportExists) {
+          addPort(event->scenePos());
+          airportExists = true;
+          settingAirport = false;
+          msg = "";
         }
-        mouseEnable = false;
-        return;
+      mouseEnable = false;
+      return;
     }
-    if (event->button() != Qt::LeftButton)
-        return;
-    if (zoneCompleted)
-        zoneCompleted = false;
-    QPointF point = event->scenePos();
-    createPoint(point);
-    if (creatingLine) {
-        completeZone();
-        creatingLine = false;
+  if (event->button() != Qt::LeftButton)
+    return;
+  if (zoneCompleted)
+    zoneCompleted = false;
+  QPointF point = event->scenePos();
+  createPoint(point);
+  if (creatingLine) {
+      completeZone();
+      creatingLine = false;
     }
-    //    if (QLineF(newPoint, point).length() < radius*2) {
-    //        point = newPoint;
-    //    } else {
-    //        if (creatingLine){
-    //            QGraphicsLineItem *line = new QGraphicsLineItem(QLineF(points[points.size()-2], point));
-    //            lines.push_back(line);
-    //            line->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
-    //            addItem(line);
-    //            creatingLine = false;
-    //        }
-    //    }
+  //    if (QLineF(newPoint, point).length() < radius*2) {
+  //        point = newPoint;
+  //    } else {
+  //        if (creatingLine){
+  //            QGraphicsLineItem *line = new QGraphicsLineItem(QLineF(points[points.size()-2], point));
+  //            lines.push_back(line);
+  //            line->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
+  //            addItem(line);
+  //            creatingLine = false;
+  //        }
+  //    }
 
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    textPos = "X = " + QString::number(event->scenePos().x()) + " Y = " + QString::number(event->scenePos().y()) + msg;
-    emit mousePosChanged();
-    if(!mouseEnable)
+  textPos = "X = " + QString::number(event->scenePos().x()) + " Y = " + QString::number(event->scenePos().y()) + msg;
+  emit mousePosChanged();
+  if(!mouseEnable)
+    return;
+  if(changingZone) {
+      if(!dragging)
         return;
-    if(changingZone) {
-        if(!dragging)
-            return;
-        if(lineItemPrev != nullptr)
-            this->removeItem(lineItemPrev);
-        if(lineItemNext != nullptr)
-            this->removeItem(lineItemNext);
-        points[indexForDragEllipse] = event->scenePos();
-        ellipses[indexForDragEllipse]->setPos(ellipses[indexForDragEllipse]->mapToParent(-event->lastScenePos()+event->scenePos()));
+      if(lineItemPrev != nullptr)
+        this->removeItem(lineItemPrev);
+      if(lineItemNext != nullptr)
+        this->removeItem(lineItemNext);
+      points[indexForDragEllipse] = event->scenePos();
+      ellipses[indexForDragEllipse]->setPos(ellipses[indexForDragEllipse]->mapToParent(-event->lastScenePos()+event->scenePos()));
 
-        QLineF linePrev, lineNext;
-        if (indexForDragEllipse == 0)
-            linePrev = QLineF(points.back(), points[indexForDragEllipse]);
-        else
-            linePrev = QLineF(points[indexForDragEllipse-1], points[indexForDragEllipse]);
-        if (indexForDragEllipse == ellipses.size()-1)
-            lineNext = QLineF(points.front(), points[indexForDragEllipse]);
-        else
-            lineNext = QLineF(points[indexForDragEllipse+1], points[indexForDragEllipse]);
-        lineItemPrev = new QGraphicsLineItem(linePrev);
-        lineItemPrev->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
-        addItem(lineItemPrev);
-        lineItemNext = new QGraphicsLineItem(lineNext);
-        lineItemNext->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
-        addItem(lineItemNext);
+      QLineF linePrev, lineNext;
+      if (indexForDragEllipse == 0)
+        linePrev = QLineF(points.back(), points[indexForDragEllipse]);
+      else
+        linePrev = QLineF(points[indexForDragEllipse-1], points[indexForDragEllipse]);
+      if (indexForDragEllipse == ellipses.size()-1)
+        lineNext = QLineF(points.front(), points[indexForDragEllipse]);
+      else
+        lineNext = QLineF(points[indexForDragEllipse+1], points[indexForDragEllipse]);
+      lineItemPrev = new QGraphicsLineItem(linePrev);
+      lineItemPrev->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
+      addItem(lineItemPrev);
+      lineItemNext = new QGraphicsLineItem(lineNext);
+      lineItemNext->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
+      addItem(lineItemNext);
     }
-    if (settingAirport)
-        return;
-    if(zoneCompleted)
-        return;
-    if(points.size() == 0)
-        return;
+  if (settingAirport)
+    return;
+  if(zoneCompleted)
+    return;
+  if(points.size() == 0)
+    return;
 
-    if(rectItem != nullptr)
-        this->removeItem(rectItem);
+  if(rectItem != nullptr)
+    this->removeItem(rectItem);
 
-    if(lineItem != nullptr)
-        this->removeItem(lineItem);
+  if(lineItem != nullptr)
+    this->removeItem(lineItem);
 
 
-    QLineF line = QLineF(points.back(),event->scenePos());
+  QLineF line = QLineF(points.back(),event->scenePos());
 
-    if (QLineF(event->scenePos(), points.front()).length() < radius*2) {
-        line = QLineF(points.back(), points.front());
-        newPoint = points.front();
-        rectItem = new QGraphicsRectItem(QRectF(points.back(),points.front()));
-        rectItem->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
-        lineItem = new QGraphicsLineItem(line);
-        lineItem->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
+  if (QLineF(event->scenePos(), points.front()).length() < radius*2) {
+      line = QLineF(points.back(), points.front());
+      newPoint = points.front();
+      rectItem = new QGraphicsRectItem(QRectF(points.back(),points.front()));
+      rectItem->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
+      lineItem = new QGraphicsLineItem(line);
+      lineItem->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap,Qt::RoundJoin));
     } else {
-        rectItem = new QGraphicsRectItem(QRectF(points.back(),event->scenePos()));
-        rectItem->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap,Qt::RoundJoin));
-        lineItem = new QGraphicsLineItem(line);
-        lineItem->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
+      rectItem = new QGraphicsRectItem(QRectF(points.back(),event->scenePos()));
+      rectItem->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap,Qt::RoundJoin));
+      lineItem = new QGraphicsLineItem(line);
+      lineItem->setPen(QPen(Qt::black, 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
 
     }
-    this->addItem(rectItem);
-    this->addItem(lineItem);
-    creatingLine = true;
+  this->addItem(rectItem);
+  this->addItem(lineItem);
+  creatingLine = true;
 }
 
 void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(!mouseEnable)
-        return;
-    if(!changingZone)
-        return;
-    if(dragging) {
-        dragging = false;
-        zoneChanged = true;
-        completeZone();
+  if(!mouseEnable)
+    return;
+  if(!changingZone)
+    return;
+  if(dragging) {
+      dragging = false;
+      zoneChanged = true;
+      completeZone();
     }
-    Q_UNUSED(event)
+  Q_UNUSED(event)
 }
 
 

@@ -119,7 +119,7 @@ void MainWindow::closePlaneMenu()
 
 void MainWindow::compute()
 {
-  scene->computeWaypoints();
+  scene->computePath();
 }
 
 void MainWindow::statusBarShowPos()

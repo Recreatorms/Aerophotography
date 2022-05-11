@@ -28,8 +28,8 @@ public:
     void clearAll();
 
     void completeZone();
-    void computeWaypoints();
-    void createWaypointsInZone(int zoneIndex, QPointF entrancePoint, QPointF exitPoint);
+    void computePath();
+    void createWaypointsInZone();
     void addPort(QPointF pos);
     void createPoint(QPointF point);
     QString textPos;
@@ -62,9 +62,11 @@ private:
     QPointF airportPoint;
     QVector<QPointF> path;
     QVector<QPointF> points;
+    QVector<QVector<QVector<QPointF> > > squares;
     QVector<QVector<QPointF> > Zones;
     QVector<QGraphicsLineItem *> lines;
     QVector<QGraphicsEllipseItem *> ellipses;
+
 
     QVector<QGraphicsPolygonItem *> polygons;
     QPointF newPoint;
