@@ -4,5 +4,3 @@ import QtLocation 5.15
 Item {
 
 }
-
-

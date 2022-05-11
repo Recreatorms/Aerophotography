@@ -53,22 +53,16 @@ QRectF Plane::boundingRect() const
 
 void Plane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QPolygonF polygon;
     painter->setPen(Qt::NoPen);
-    painter->setBrush(Qt::blue);
-    painter->setOpacity(0.4);    
-    qreal radius = 15;
-//    painter->setCompositionMode(QPainter::CompositionMode_SourceIn);
-//    painter->drawEllipse(QPointF(0,-radius/2),radius/3,radius/2);
-//    painter->drawEllipse(QPointF(0,radius/2),radius/3,radius/2);
-    qreal h = radius*sqrt(3)/2;
-    polygon << QPointF(-(h),-(radius)) << QPointF(h,-(radius)) << QPointF(-(h),radius) << QPointF(h,radius);
-    painter->drawPolygon(polygon);
-    polygon.clear();
-    painter->setOpacity(1);
-    painter->setPen(Qt::black);
     painter->setBrush(QBrush(Qt::red));
-    polygon << QPointF(-3,-3) << QPointF(4,0) << QPointF(-3,3);
+    QPolygonF polygon;
+    polygon << QPointF(-3,-3) << QPointF(3,0) << QPointF(-3,3);
+    painter->drawPolygon(polygon);
+    painter->setBrush(Qt::blue);
+    painter->setOpacity(0.4);
+    polygon.clear();
+    qreal radius = 50;
+    polygon << QPointF(-(3+radius/3),-(4+radius)) << QPointF(3+radius/3,-(4+radius)) << QPointF(-(3+radius/3),4+radius) << QPointF(3+radius/3,4+radius);
     painter->drawPolygon(polygon);
     Q_UNUSED(option)
     Q_UNUSED(widget)
