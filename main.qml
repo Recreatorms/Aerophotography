@@ -4,14 +4,14 @@ import QtQml 2.0
  import QtLocation 5.6
  import QtPositioning 5.6
 
- Window {
+MapItemView {
      width: 512
      height: 512
      visible: true
 
      Plugin {
          id: mapPlugin
-         name: "osm" // "mapboxgl", "esri", ...
+         name: "esri" // "mapboxgl", "esri", ...
          // specify plugin parameters if necessary
          // PluginParameter {
          //     name:
@@ -22,8 +22,9 @@ import QtQml 2.0
      Map {
          anchors.fill: parent
          plugin: mapPlugin
-         center: QtPositioning.coordinate(59.91, 10.75) // Oslo
-         zoomLevel: 14
+         center: QtPositioning.coordinate(55.751244, 37.618423) // Oslo
+         zoomLevel: 10
+         maximumTilt: 0
      }
 
  }

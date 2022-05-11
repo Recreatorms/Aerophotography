@@ -7,8 +7,9 @@
 #include <QDebug>
 #include <qdebug.h>
 #include <QtQml>
-
-#include <QtLocation/QGeoServiceProvider>
+#include <QQuickWidget>
+#include <QQuickItem>
+//#include <QtLocation/QGeoServiceProvider>
 
 //#include <QtLocation/QGeoServiceProvider>
 //#include <QtLocation/qgeoserviceprovider.h>
@@ -49,6 +50,7 @@ private:
     PlaneMenu *planeMenu;
     GraphicsViewZoom *zoom;
     QTimer *timer;
+//    QQuickWidget *quickView;
 
 
 };

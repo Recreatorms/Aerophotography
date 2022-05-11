@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml location
+QT       += core gui qml quickwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

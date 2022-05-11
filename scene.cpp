@@ -224,7 +224,7 @@ void Scene::computeWaypoints()
     QVector<QPointF> pointsOnBorder;
     QPointF enterPoint;
     QVector<int> indexes;
-    qreal radius=10; //plane scan radius;
+    qreal radius=20; //plane scan radius;
     for (int i = 0; i < Zones.size(); i++) {
         for (int j = 0; j < Zones[i].size(); j++) {
             qDebug() << "Enterpoint #" << j << " = "<<Zones[i][j];
@@ -233,7 +233,7 @@ void Scene::computeWaypoints()
                 int k =1;
                 do {
                     //                    (int k = 1; k < (int)len/radius; k++)
-                    int numberOfPoints = static_cast<int>(len/radius+1);
+                    int numberOfPoints = (int)(len/radius+1);
                     if (numberOfPoints < 2)
                         numberOfPoints = 2;
                     if (Zones[i][j].rx() == Zones[i][0].rx()) {
@@ -250,7 +250,7 @@ void Scene::computeWaypoints()
                     addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5)));
                     pointsOnBorder.push_back(enterPoint);
                     k++;
-                } while(k<static_cast<int>(len/radius));
+                } while(k<(int)len/radius);
                 border.push_back(pointsOnBorder);
                 pointsOnBorder.clear();
             }
@@ -259,7 +259,7 @@ void Scene::computeWaypoints()
                 int k = 1;
                 do {
                     //                    (int k = 1; k < (int)len/radius; k++)
-                    int numberOfPoints = static_cast<int>(len/radius+1);
+                    int numberOfPoints = (int)(len/radius+1);
                     if (numberOfPoints < 2)
                         numberOfPoints = 2;
                     if (Zones[i][j].rx() == Zones[i][j+1].rx()) {
@@ -276,7 +276,7 @@ void Scene::computeWaypoints()
                     addEllipse(QRectF(enterPoint+QPointF(-0.5,-0.5),enterPoint+QPointF(0.5,0.5))); ///////////////////////////////////////
                     pointsOnBorder.push_back(enterPoint);
                     k++;
-                } while(k < static_cast<int>(len/radius));
+                } while(k <(int)len/radius);
                 border.push_back(pointsOnBorder);
                 pointsOnBorder.clear();
             }
@@ -306,88 +306,76 @@ void Scene::computeWaypoints()
     bool rotation = false,
             scanned = false;
     int indexI = -1, indexJ = -1, indexK = -1, counter = 0;
-    for (int i = 0; i < squares.size(); i++) {
+    for (int i = 0; i < squares.size(); i++) { //  <--------------------------- надо поменять ограничение на цикл либо полностью менять
         minLine.setLength(0.0);
-        while (!scanned) {
-            //        for (int n = 0; n < squares.size();n++) {
+        qDebug() << "Next square";
+            while (!scanned) {
+//        for (int n = 0; n < squares.size();n++) {
             maxLine.setLength(0.0);
 
-            qDebug() << "Next square";
-            for (int j = 0; j < squares[i].size(); j++) {
+            for (int j = 0; j < squares[i].size(); j++) { // <---------------- число сторон на области (default = 4)
                 qDebug() << "Next border";
-                for (int k = 0; k < squares[i][j].size();k++) {
+                for (int k = 0; k < squares[i][j].size();k++) { // <----------- число точек на одной грани
                     if(!rotation)
                         if (indexes.contains(i))
                             break;
-///////// fix it
-///         если идёт разворот, тогда
-///         нам нужно от предыдущей точки, которая посередине, провести прямую к соседней,
-///         а затем по следующему кругу уже идти дальше
-                    _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][k]);
-//////// fix it
-///         нужно что-то придумать с минмаксом прямых,
-///         а то маршрут не совсем эффективный, от слова совсем
+
+                    _line = QLineF(squares[i][j][k], squares[i][(j+squares[i].size()/2)%squares[i].size()][/*squares[i][(j+squares[i].size()/2)%squares[i].size()].size()-1-k*/k]);
+                    //_line = QLineF(squares[i][j],squares[i][(j+squares[i].size()/2)%squares[i].size()]);
                     if(_line.length() > maxLine.length()) {
                         maxLine = _line;
-                        _line = QLineF(path.back(),squares[i][j][k]);
-//                      qDebug() << "_Line = " << _line.length();
-//                      qDebug() << "minLine = " << minLine.length();
-//                      if (_line.length() < minLine.length()) {
+
+
+//                        _line = QLineF(path.back(),squares[i][j][k]);
+                        //                qDebug() << "_Line = " << _line.length();
+                        //     qDebug() << "minLine = " << minLine.length();
+                        //                        if (_line.length() < minLine.length()) {
                         qDebug() << "looking good";
-                        minLine = _line;
+//                        minLine = _line;
                         indexI = i;
                         indexJ = j;
                         indexK = k;
-                        if (!rotation) {
+                        if (!rotation)
                             break;
-                        }
                         if (indexK < squares[indexI][indexJ].size()-1)
                             indexK++;
-                        else
-                            indexK--;
-//                      }
+                        else {
+//                            indexK--;
+                            rotation = false;
+                        }
+//                        }
                     }
                 }
             }
 
-            qDebug() << "added new waypoint with\nindexI = " << indexI << "\nindexJ = " << indexJ << "\nindexK = "<< indexK;
-            indexes.push_back(indexI);
-            path.push_back(squares[indexI][indexJ][indexK]);
-            //      Нужен отступ
-            //      смотри далее
-            path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][indexK]);
-            /*squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()].size()-1-indexK]*/
-
-            // создаём точку посередине,
-            // если одной линией нельзя покрыть всю зону,
-            // пока без отступа
-            if (squares[indexI][indexJ].size() > 1) {
-                qDebug() << "we need another point on same border";
-                //switch(indexJ < (indexJ+squares[indexI].size()/2)%squares[indexI].size()indexJ) up down left right
-                int invertedIndexJ = (indexJ+squares[indexI].size()/2)%squares[indexI].size();
-                rotation = true;
-                counter++;
-                QPointF point;
-                if(indexK > squares[indexI][indexJ].size()-1)
-                    point = QPointF((squares[indexI][invertedIndexJ][indexK]+squares[indexI][invertedIndexJ][indexK-1])/2);
-                else
-                    point = QPointF((squares[indexI][invertedIndexJ][indexK]+squares[indexI][invertedIndexJ][indexK+1])/2);
-                path.push_back(point);
-                qDebug() << "counter = " << counter << "max = " << squares[indexI][indexJ].size();
-                if (counter > squares[indexI][indexJ].size()) {
-                    qDebug() << "End rotation";
-                    rotation = false;
-                    counter = 0;
-                    scanned = true;
-                    break;
-                }
-            } else {
+        qDebug() << "added new waypoint with\nindexI = " << indexI << "\nindexJ = " << indexJ << "\nindexK = "<< indexK;
+        indexes.push_back(indexI);
+        path.push_back(squares[indexI][indexJ][indexK]);
+        //        offset;
+        path.push_back(squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()][/*squares[indexI][(indexJ+squares[indexI].size()/2)%squares[indexI].size()].size()-1-indexK*/indexK]);
+        if (squares[indexI][indexJ].size() > 1) {
+            qDebug() << "we need another point on same border";
+            //switch(indexJ < (indexJ+squares[indexI].size()/2)%squares[indexI].size()indexJ) up down left right
+            indexJ = (indexJ+squares[indexI].size()/2)%squares[indexI].size();
+            rotation = true;
+            counter++;
+            QPointF point;
+            if(indexK < squares[indexI][indexJ].size()-1)
+                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK+1])/2);
+            else
+                point = QPointF((squares[indexI][indexJ][indexK]+squares[indexI][indexJ][indexK-1])/2);
+            path.push_back(point);
+            qDebug() << "counter = " << counter << "max = " << squares[indexI][indexJ].size();
+            if (counter > squares[indexI][indexJ].size()) {
                 rotation = false;
+                counter = 0;
                 scanned = true;
+                break;
             }
-            qDebug() << "Added line with length = " << minLine.length() ;
-        }
-        scanned = false;
+        } else
+          scanned = true;
+        qDebug() << "Added line with length = " << minLine.length() ;
+            }
     }
 
     path.push_back(airportPoint);
@@ -412,9 +400,8 @@ void Scene::computeWaypoints()
 
 void Scene::createWaypointsInZone(int zoneIndex, QPointF entrancePoint, QPointF exitPoint)
 {
-        Q_UNUSED(zoneIndex)
-        Q_UNUSED(entrancePoint)
-        Q_UNUSED(exitPoint)
+    //    Q_UNUSED(entrancePoint)
+    //    Q_UNUSED(exitPoint)
     //    QVector<QGraphicsEllipseItem *> circles;
     //    qreal ellipseRadius = 1.0;
     //    for (int k = 0; k < Zones.size(); k++) {

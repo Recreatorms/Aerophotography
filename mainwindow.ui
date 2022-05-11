@@ -30,7 +30,7 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item row="0" column="0">
+    <item row="0" column="1">
      <widget class="MyView" name="myView">
       <property name="minimumSize">
        <size>
@@ -55,6 +55,19 @@
       </property>
       <property name="viewportUpdateMode">
        <enum>QGraphicsView::FullViewportUpdate</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QQuickWidget" name="quickWidget">
+      <property name="minimumSize">
+       <size>
+        <width>500</width>
+        <height>331</height>
+       </size>
+      </property>
+      <property name="resizeMode">
+       <enum>QQuickWidget::SizeRootObjectToView</enum>
       </property>
      </widget>
     </item>
@@ -101,6 +114,9 @@
    </property>
    <property name="text">
     <string>Add new zone</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionChangePlaneSettings">
@@ -151,6 +167,11 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
+  <customwidget>
+   <class>QQuickWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QtQuickWidgets/QQuickWidget</header>
+  </customwidget>
   <customwidget>
    <class>MyView</class>
    <extends>QGraphicsView</extends>
