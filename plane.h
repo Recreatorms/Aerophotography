@@ -12,6 +12,7 @@ class Plane : public QObject, public QGraphicsItem
     Q_OBJECT
 public:
     explicit Plane(QObject *parent, QPointF _startPoint, QVector<QPointF> &_route);
+    ~Plane();
     void move();
 
 protected:
@@ -21,6 +22,7 @@ private:
     QVector<QPointF> &route;
     QPointF currentPoint, nextPoint;
     qreal angle;
+    QPixmap *pixmap;
 };
 
 #endif // PLANE_H

@@ -9,6 +9,7 @@
 #include <QtQml>
 #include <QQuickWidget>
 #include <QQuickItem>
+#include <QFileDialog>
 //#include <QtLocation/QGeoServiceProvider>
 
 //#include <QtLocation/QGeoServiceProvider>
@@ -44,6 +45,9 @@ private slots:
     void compute();
     void statusBarShowPos();
     void startSimFlight();
+    void cursorDrag();
+    void cursorStandart();
+    void setSceneBackgroundImage();
 private:
     Ui::MainWindow *ui;
     Scene *scene;

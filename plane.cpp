@@ -13,6 +13,9 @@ Plane::Plane(QObject *parent, QPointF _startPoint, QVector<QPointF> &_route) :
 
 }
 
+Plane::~Plane() {
+  delete pixmap;
+}
 void Plane::move()
 {
     if(nextPoint == route.back()) {
@@ -34,10 +37,10 @@ void Plane::move()
         //        qDebug() << "Distance = " << QLineF(this->pos(),nextPoint).length();
     }
     else {
-        qDebug() <<"====================================\n" <<route << "\n===========================================\nCurrent Point was " << currentPoint << "\nNext point was " << nextPoint;
+//        qDebug() <<"====================================\n" <<route << "\n===========================================\nCurrent Point was " << currentPoint << "\nNext point was " << nextPoint;
         currentPoint = nextPoint;
         nextPoint = route[route.indexOf(currentPoint)+1];
-        qDebug() << "Now next point is " << nextPoint;
+//        qDebug() << "Now next point is " << nextPoint;
         //        angle = qRadiansToDegrees(qAcos(QLineF(currentPoint,QPointF(nextPoint.x(),currentPoint.y())).length()/QLineF(currentPoint,nextPoint).length()));
 
         //        setRotation(angle);
@@ -57,7 +60,7 @@ void Plane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->setPen(Qt::NoPen);
     painter->setBrush(Qt::blue);
     painter->setOpacity(0.4);    
-    qreal radius = 16;
+    qreal radius = 69;
 //    painter->setCompositionMode(QPainter::CompositionMode_SourceIn);
 //    painter->drawEllipse(QPointF(0,-radius/2),radius/3,radius/2);
 //    painter->drawEllipse(QPointF(0,radius/2),radius/3,radius/2);
@@ -68,8 +71,14 @@ void Plane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->setOpacity(1);
     painter->setPen(Qt::black);
     painter->setBrush(QBrush(Qt::red));
-    polygon << QPointF(-3,-3) << QPointF(4,0) << QPointF(-3,3);
-    painter->drawPolygon(polygon);
+//    polygon << QPointF(-3,-3) << QPointF(4,0) << QPointF(-3,3);
+//    painter->drawPolygon(polygon);
+    pixmap = new QPixmap("../images/airplane.png");
+    QTransform transf = painter->transform();
+    transf.scale(0.25,0.25);
+    transf.rotate(90);
+    painter->setTransform(transf);
+    painter->drawPixmap(boundingRect(),*pixmap,pixmap->rect());
     Q_UNUSED(option)
     Q_UNUSED(widget)
 }

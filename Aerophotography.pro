@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml quickwidgets
+QT       += core gui qml quickwidgets location location-private
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -39,7 +39,8 @@ HEADERS += \
     myview.h \
     graphicsviewzoom.h \
     plane.h
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    images.qrc
 FORMS += \
         mainwindow.ui \
     planemenu.ui

@@ -1,19 +1,31 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QtLocation/private/qdeclarativegeomapitembase_p.h>
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+  this->setWindowTitle("Aerophotography");
 
 //  quickView = new QQuickWidget;
 //  quickView->setParent(this);
-  ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/main.qml")));
-//  quickView->setSource(QUrl(QStringLiteral("qrc:/main.qml")));
-//  quickView->show();
-  QQuickItem item;
-//  item.set
-  item.setParent(ui->quickWidget);
+//  ui->quickWidget->setSource(QUrl("qrc:/map.qml"));
+  ui->quickWidget->hide();
+
+//  if(QQuickItem *map = ui->quickWidget->findChild<QQuickItem*>("map1")){
+//      QQmlComponent component(ui->quickWidget->engine(), QUrl("qrc:/rect.qml"));
+//      if(QDeclarativeGeoMapItemBase *rect = qobject_cast<QDeclarativeGeoMapItemBase*>(component.create(ui->quickWidget->rootContext()))){
+//          bool status = QMetaObject::invokeMethod(map,
+//                                    "addMapItem",
+//                                    Qt::DirectConnection,
+//                                    Q_ARG(QDeclarativeGeoMapItemBase*, rect));
+//          Q_ASSERT(status);
+//      }
+//  }
+  scene = new Scene();
+  ui->myView->setScene(scene);
 
   planeMenu = new PlaneMenu();
   zoom = new GraphicsViewZoom(ui->myView);
@@ -31,11 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(planeMenu, &PlaneMenu::closeMenu, this, &MainWindow::closePlaneMenu);
 
 //  ui->myView->setParent(ui->quickWidget);
-
-  scene = new Scene();
-  ui->myView->setScene(scene);
   connect(scene, &Scene::mousePosChanged, this, &MainWindow::statusBarShowPos);
   connect(ui->actionStartSimFlight, &QAction::triggered, this, &MainWindow::startSimFlight);
+  connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::setSceneBackgroundImage);
+  connect(scene, &Scene::cursorChangedToDrag, this, &MainWindow::cursorDrag);
+  connect(scene, &Scene::cursorStandart, this, &MainWindow::cursorStandart);
 
 //  scene->setParent(ui->quickWidget);
 
@@ -48,10 +60,32 @@ MainWindow::MainWindow(QWidget *parent) :
 
   //    scene->setBackgroundBrush(QBrush(Qt::cyan));
   addGeoService();
-
-
+  scene->addPort(QPointF(100,250));
+  scene->setScale(20);
   //    timer->start(5);
   //    scene->setBackgroundBrush(QBrush(QPixmap("map.png")));
+
+}
+
+
+void MainWindow::cursorDrag()
+{
+    this->setCursor(scene->cursor);
+}
+
+void MainWindow::cursorStandart()
+{
+  this->setCursor(scene->cursor);
+}
+
+void MainWindow::setSceneBackgroundImage()
+{
+  QString filename;
+  QString path = QFileDialog::getOpenFileName(this, "Открыть файл", filename, "*.png *.jpg" );
+  if(path != "")
+      scene->setBackgroundImage(path);
+     qDebug() << "Path = " << path ;
+     qDebug() << "Filename = " << filename;
 
 }
 
@@ -62,10 +96,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::addGeoService()
 {
-  //QStringList services =  QGeoServiceProvider::availableServiceProviders();
-  // if (!services.isEmpty()) {
-  //     qDebug() << services;
-  //  }
+//  QStringList services =  QGeoServiceProvider::availableServiceProviders();
+//   if (!services.isEmpty()) {
+//       qDebug() << services;
+//    }
 
   //    QGraphicsGeoMap
 }
